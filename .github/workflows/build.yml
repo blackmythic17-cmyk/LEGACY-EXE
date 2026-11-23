@@ -1,0 +1,38 @@
+
+name: Build LEGACY EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Extract project
+        run: unzip LegacyEXE-Android-Project.zip -d project
+
+      - name: Find project and build
+        run: |
+          cd project
+          DIR=$(find . -name settings.gradle -o -name settings.gradle.kts | head -1 | xargs dirname)
+          cd "$DIR"
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEGACY-EXE-APK
+          path: project/**/build/outputs/apk/debug/*.apk
+          
